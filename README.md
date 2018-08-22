@@ -13,3 +13,5 @@ Sentiment Analysis Tool for Twitter using Python 3.5 and MongoDB
   * matplotlib
 
 ## Instructions
+
+Forked from [DSkoufis/My_Thesis](https://github.com/DSkoufis/My_Thesis)
