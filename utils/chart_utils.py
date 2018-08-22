@@ -4,13 +4,13 @@
 from utils import db_utils, read_write
 from pymongo.errors import ServerSelectionTimeoutError, AutoReconnect
 from tkinter import messagebox
+import sys
 
 try:
     import matplotlib.pyplot as plt
-    import numpy as np
 except ImportError as e:
     read_write.log_message("[FATAL] (chart_utils) : ImportError: " + str(e))
-    # sys.exit("[SEVERE] " + str(e) + ". Please install this module to continue")
+    sys.exit("[SEVERE] " + str(e) + ". Please install this module to continue")
 
 LOG_NAME = " (chart_utils) : "
 

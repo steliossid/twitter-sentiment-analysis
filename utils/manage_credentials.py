@@ -31,4 +31,3 @@ def get_stream(listener):
 
     stream = Stream(auth, listener)  # and we setting the stream item
     return stream
-

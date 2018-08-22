@@ -1,5 +1,5 @@
 #######################################################################################################
-# Module that is responsible to some useful functionality into the project like tweet formatting etc. #
+# Module that is responsible to functionalities like tweet formatting etc.                            #
 #######################################################################################################
 from utils import sentiment_utils
 

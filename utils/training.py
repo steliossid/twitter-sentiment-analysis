@@ -106,14 +106,15 @@ def train_sentiment_analyzer(trainer, save_analyzer=False, n_instances=None, cat
     classifier = sentim_analyzer.train(trainer, training_set)
     try:
         classifier.show_most_informative_features()
-        message_acc = 'Accuracy of classifier = ' + str(classify.accuracy(classifier, testing_set)*100 + "%")
-        print(message_acc)
-        read_write.log_message("[INFO]" + LOG_NAME + message_acc)
     except AttributeError:
         message = "Your classifier does not provide a show_most_informative_features() method."
         print(message)
         read_write.log_message(message)
         sentim_analyzer.evaluate(testing_set)
+    classifier_accuracy_percent = (classify.accuracy(classifier, testing_set)) * 100
+    message_acc = 'Accuracy of classifier = ' + str(classifier_accuracy_percent) + '%'
+    print(message_acc)
+    read_write.log_message("[INFO]" + LOG_NAME + message_acc)
     if save_analyzer:
         if category:  # True for polarity
             save_file(sentim_analyzer, 'files/sa_polarity.pickle')

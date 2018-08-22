@@ -3,10 +3,8 @@
 #####################################################################################################
 from utils import read_write
 import sys
-
 try:
     from textblob import TextBlob
-
     from nltk.sentiment.util import *
     from nltk.tokenize import regexp
 except ImportError as e:
@@ -15,6 +13,7 @@ except ImportError as e:
 
 try:
     from nltk.sentiment.vader import SentimentIntensityAnalyzer
+    from nltk.corpus import stopwords
 except LookupError as e:
     read_write.log_message("[FATAL] (sentiment_utils) : LookupError: " + str(e))
     instructions = " ****   INSTALLATION INSTRUCTIONS   ****\n\n"
@@ -79,15 +78,14 @@ def vader_polarity(text):
 
 
 def sent_result(text, category):
-    # Classify a single sentence as positive or negative using a stored SentimentAnalyzer.
+    # Classify a single sentence as positive/negative and subjective/objective using a stored custom classifier.
     word_tokenizer = regexp.WhitespaceTokenizer()
+    # Tokenize and convert to lower case
+    tokenized_text = [word.lower() for word in word_tokenizer.tokenize(text)]
     if category:  # True for polarity
         sentim_analyzer = load('files/sa_polarity.pickle')
     else:  # False for subjectivity
         sentim_analyzer = load('files/sa_subjectivity.pickle')
-    # Tokenize and convert to lower case
-    tokenized_text = [word.lower() for word in word_tokenizer.tokenize(text)]
     label = sentim_analyzer.classify(tokenized_text)
 
     return label
-

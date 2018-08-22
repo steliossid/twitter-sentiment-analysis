@@ -448,7 +448,7 @@ class StatsFrame(Frame):
 
             Label(self.quick_facts_frm, text="Total unique tweets stored:").grid(row=5, column=0, padx=2, pady=2,
                                                                                  sticky=W)
-            Label(self.quick_facts_frm, text=str(tweets_sum)).grid(row=5, column=2, pady=2)
+            Label(self.quick_facts_frm, text=str(tweets_sum)).grid(row=5, column=1, pady=2)
 
             # build the widgets for show_graphs_frm
             # textblob polarity piechart
