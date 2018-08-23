@@ -15,8 +15,8 @@ Sentiment Analysis Tool for Twitter using Python 3.5 and MongoDB
 ## Instructions
 * Install [Python 3.5](https://www.python.org/downloads/release/python-350/)
 * Install [MongoDB](https://www.mongodb.com/download-center#community)
-* Create a Twitter app
-* Save API Key, API Secret, Access Token and Access Token Secret inside files/credentials.json
+* Create a [Twitter app](https://apps.twitter.com/)
+* Save all keys and access tokens inside files/credentials.json
 
 **DO NOT SHARE YOUR PERSONAL KEYS!**
 
