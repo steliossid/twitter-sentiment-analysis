@@ -6,6 +6,7 @@ import sys
 import os.path
 import string
 from tkinter import messagebox
+from random import shuffle
 try:
     from nltk import classify
     from nltk.sentiment.util import *
@@ -41,10 +42,10 @@ def start_training():
         messagebox.showinfo("File found", message1)
     else:
         message1 = "Cannot find the polarity sentiment analyzer file.\n"
-        message1 += "Training a new one using NaiveBayesClassifier.\n"
+        message1 += "Training a new one using Naive Bayes Classifier.\n"
         message1 += "Be patient. It might take a while."
         messagebox.showinfo("Training", message1)
-        train_sentiment_analyzer(NaiveBayesClassifier.train, True, 100, True)
+        train_sentiment_analyzer_polarity(1000)
         messagebox.showinfo("Training", "Polarity Training finished.")
     read_write.log_message("[INFO]" + LOG_NAME + message1)
     if subj_checkfile:
@@ -52,47 +53,117 @@ def start_training():
         messagebox.showinfo("File found", message2)
     else:
         message2 = "Cannot find the subjectivity sentiment analyzer file.\n"
-        message2 += "Training a new one using NaiveBayesClassifier.\n"
+        message2 += "Training a new one using Naive Bayes Classifier.\n"
         message2 += "Be patient. It might take a while."
         messagebox.showinfo("Training", message2)
-        train_sentiment_analyzer(NaiveBayesClassifier.train, True, 1500, False)
+        train_sentiment_analyzer_subjectivity(5000)
         messagebox.showinfo("Training", "Subjectivity Training finished.")
     read_write.log_message("[INFO]" + LOG_NAME + message2)
 
 
-def train_sentiment_analyzer(trainer, save_analyzer=False, n_instances=None, category=None):
+def bag_of_words(words):
+    stopwords_english = stopwords.words('english')
+    punctuation = list(string.punctuation)
+    punctuation.append("''")
+    punctuation.append("``")
+    punctuation.append("—")
+    punctuation.append("…")
+    punctuation.append("...")
+    punctuation.append("--")
+    punctuation.append("..")
+    stopwords_english.extend(punctuation)
+    words_clean = []
+
+    for word in words:
+        word = word.lower()
+        if word not in stopwords_english and word not in string.digits:
+            words_clean.append(word)
+
+    words_dictionary = dict([word, True] for word in words_clean)
+
+    return words_dictionary
+
+
+def train_sentiment_analyzer_polarity(n_instances=None):
+
+    if n_instances is not None:
+        n_instances = int(0.2*n_instances)
+
+    pos_reviews = []
+    for fileid in movie_reviews.fileids('pos'):
+        words = movie_reviews.words(fileid)
+        pos_reviews.append(words)
+
+    neg_reviews = []
+    for fileid in movie_reviews.fileids('neg'):
+        words = movie_reviews.words(fileid)
+        neg_reviews.append(words)
+
+    # positive reviews feature set
+    pos_reviews_set = []
+    for words in pos_reviews:
+        pos_reviews_set.append((bag_of_words(words), 'pos'))
+
+    # negative reviews feature set
+    neg_reviews_set = []
+    for words in neg_reviews:
+        neg_reviews_set.append((bag_of_words(words), 'neg'))
+
+    shuffle(pos_reviews_set)
+    shuffle(neg_reviews_set)
+
+    test_set = pos_reviews_set[:n_instances] + neg_reviews_set[:n_instances]
+    train_set = pos_reviews_set[n_instances:] + neg_reviews_set[n_instances:]
+
+    print('Training classifier')
+    classifier = NaiveBayesClassifier.train(train_set)
+
+    print(classifier.show_most_informative_features(10))
+
+    classifier_accuracy_percent = (classify.accuracy(classifier, test_set)) * 100
+    message_acc = 'Accuracy of classifier = ' + str(classifier_accuracy_percent) + '%'
+    print(message_acc)
+    read_write.log_message("[INFO]" + LOG_NAME + message_acc)
+
+    save_file(classifier, 'files/sa_polarity.pickle')
+    message = "sa_polarity.pickle file saved."
+    print(message)
+    read_write.log_message(message)
+
+
+def train_sentiment_analyzer_subjectivity(n_instances=None):
     if n_instances is not None:
         n_instances = int(n_instances / 2)
 
-    # NLTK's integrated Movie Reviews dataset for the polarity training
-    # and subjectivity dataset for the subj training
-    if category:  # True for polarity
-        first_docs = [(list(movie_reviews.words(pos_id)), 'pos')
-                      for pos_id in movie_reviews.fileids('pos')[:n_instances]]
-        second_docs = [(list(movie_reviews.words(neg_id)), 'neg')
-                       for neg_id in movie_reviews.fileids('neg')[:n_instances]]
-    else:  # False for subjectivity
-        first_docs = [(sent, 'subj') for sent in subjectivity.sents(categories='subj')[:n_instances]]
-        second_docs = [(sent, 'obj') for sent in subjectivity.sents(categories='obj')[:n_instances]]
+    # NLTK's integrated  and subjectivity dataset for the subj training
+    subj_docs = [(sent, 'subj') for sent in subjectivity.sents(categories='subj')[:n_instances]]
+    obj_docs = [(sent, 'obj') for sent in subjectivity.sents(categories='obj')[:n_instances]]
 
     # We separately split positive and negative instances to keep a balanced
     # uniform class distribution in both train and test sets.
-    train_first_docs, test_first_docs = split_train_test(first_docs)
-    train_second_docs, test_second_docs = split_train_test(second_docs)
+    train_subj_docs, test_subj_docs = split_train_test(subj_docs)
+    train_obj_docs, test_obj_docs = split_train_test(obj_docs)
 
-    training_docs = train_first_docs + train_second_docs
-    testing_docs = test_first_docs + test_second_docs
+    training_docs = train_subj_docs + train_obj_docs
+    testing_docs = test_subj_docs + test_obj_docs
 
     sentim_analyzer = SentimentAnalyzer()
-    if category:
-        all_words = sentim_analyzer.all_words(training_docs)
-    else:
-        all_words = sentim_analyzer.all_words([mark_negation(doc) for doc in training_docs])
 
-    all_words_clean = []
+    all_words = sentim_analyzer.all_words([mark_negation(doc) for doc in training_docs])
+
     stopwords_english = stopwords.words('english')
+    punctuation = list(string.punctuation)
+    punctuation.append("''")
+    punctuation.append("``")
+    punctuation.append("—")
+    punctuation.append("…")
+    punctuation.append("...")
+    punctuation.append("--")
+    punctuation.append("..")
+    stopwords_english.extend(punctuation)
+    all_words_clean = []
     for word in all_words:
-        if word not in stopwords_english and word not in string.punctuation:
+        if word not in stopwords_english and word not in string.digits:
             all_words_clean.append(word)
 
     # Add simple unigram word features
@@ -103,6 +174,7 @@ def train_sentiment_analyzer(trainer, save_analyzer=False, n_instances=None, cat
     training_set = sentim_analyzer.apply_features(training_docs)
     testing_set = sentim_analyzer.apply_features(testing_docs)
 
+    trainer = NaiveBayesClassifier.train
     classifier = sentim_analyzer.train(trainer, training_set)
     try:
         classifier.show_most_informative_features()
@@ -115,14 +187,8 @@ def train_sentiment_analyzer(trainer, save_analyzer=False, n_instances=None, cat
     message_acc = 'Accuracy of classifier = ' + str(classifier_accuracy_percent) + '%'
     print(message_acc)
     read_write.log_message("[INFO]" + LOG_NAME + message_acc)
-    if save_analyzer:
-        if category:  # True for polarity
-            save_file(sentim_analyzer, 'files/sa_polarity.pickle')
-            message = "sa_polarity.pickle file saved."
-            print(message)
-            read_write.log_message(message)
-        else:  # False for subjectivity
-            save_file(sentim_analyzer, 'files/sa_subjectivity.pickle')
-            message = "sa_subjectivity.pickle file saved."
-            print(message)
-            read_write.log_message(message)
+
+    save_file(sentim_analyzer, 'files/sa_subjectivity.pickle')
+    message = "sa_subjectivity.pickle file saved."
+    print(message)
+    read_write.log_message(message)

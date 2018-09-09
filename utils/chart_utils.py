@@ -1,5 +1,5 @@
 ###########################################################################################
-# Module that is responsible to show the piecharts of the sentiment analysis results      #
+# Module that is responsible to show the pie charts of the sentiment analysis results      #
 ###########################################################################################
 from utils import db_utils, read_write
 from pymongo.errors import ServerSelectionTimeoutError, AutoReconnect
@@ -36,7 +36,7 @@ def show_textblob_polarity():
         ax1.pie(sizes, labels=labels, autopct='%1.1f%%',
                 shadow=True, startangle=90)
         ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-
+        plt.title('Textblob Polarity')
         plt.show()
     except ServerSelectionTimeoutError as e:
         read_write.log_message("[ERROR]" + LOG_NAME + "ServerSelectionTimeoutError: " + str(e))
@@ -67,7 +67,7 @@ def show_textblob_subjectivity():
         ax1.pie(sizes, labels=labels, autopct='%1.1f%%',
                 shadow=True, startangle=90)
         ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-
+        plt.title('Textblob Subjectivity')
         plt.show()
 
     except ServerSelectionTimeoutError as e:
@@ -101,7 +101,7 @@ def show_vader_polarity():
         ax1.pie(sizes, labels=labels, autopct='%1.1f%%',
                 shadow=True, startangle=90)
         ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-
+        plt.title('VADER Polarity')
         plt.show()
     except ServerSelectionTimeoutError as e:
         read_write.log_message("[ERROR]" + LOG_NAME + "ServerSelectionTimeoutError: " + str(e))
@@ -132,7 +132,7 @@ def show_training_polarity():
         ax1.pie(sizes, labels=labels, autopct='%1.1f%%',
                 shadow=True, startangle=90)
         ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-
+        plt.title('NLTK Polarity')
         plt.show()
     except ServerSelectionTimeoutError as e:
         read_write.log_message("[ERROR]" + LOG_NAME + "ServerSelectionTimeoutError: " + str(e))
@@ -163,7 +163,7 @@ def show_training_subjectivity():
         ax1.pie(sizes, labels=labels, autopct='%1.1f%%',
                 shadow=True, startangle=90)
         ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-
+        plt.title('NLTK Subjectivity')
         plt.show()
 
     except ServerSelectionTimeoutError as e:

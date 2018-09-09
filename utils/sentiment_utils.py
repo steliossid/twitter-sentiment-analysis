@@ -1,19 +1,18 @@
 #####################################################################################################
 # Module that is responsible for the sentiment analysis of the tweets                               #
 #####################################################################################################
-from utils import read_write
+from utils import read_write, training
 import sys
 try:
     from textblob import TextBlob
     from nltk.sentiment.util import *
-    from nltk.tokenize import regexp
+    from nltk.tokenize import regexp, word_tokenize
 except ImportError as e:
     read_write.log_message("[FATAL] (sentiment_utils) : ImportError: " + str(e))
     sys.exit("[SEVERE] " + str(e) + ". Please install this module to continue")
 
 try:
     from nltk.sentiment.vader import SentimentIntensityAnalyzer
-    from nltk.corpus import stopwords
 except LookupError as e:
     read_write.log_message("[FATAL] (sentiment_utils) : LookupError: " + str(e))
     instructions = " ****   INSTALLATION INSTRUCTIONS   ****\n\n"
@@ -77,15 +76,24 @@ def vader_polarity(text):
     return label
 
 
-def sent_result(text, category):
-    # Classify a single sentence as positive/negative and subjective/objective using a stored custom classifier.
+def sent_result_polarity(text):
+    # Classify a single sentence as positive/negative using a stored custom classifier.
+    tokens = word_tokenize(text)
+    custom_set = training.bag_of_words(tokens)
+    classifier = load('files/sa_polarity.pickle')
+    label = classifier.classify(custom_set)
+
+    return label
+
+
+def sent_result_subjectivity(text):
+    # Classify a single sentence as subjective/objective using a stored custom classifier.
     word_tokenizer = regexp.WhitespaceTokenizer()
     # Tokenize and convert to lower case
     tokenized_text = [word.lower() for word in word_tokenizer.tokenize(text)]
-    if category:  # True for polarity
-        sentim_analyzer = load('files/sa_polarity.pickle')
-    else:  # False for subjectivity
-        sentim_analyzer = load('files/sa_subjectivity.pickle')
+    sentim_analyzer = load('files/sa_subjectivity.pickle')
     label = sentim_analyzer.classify(tokenized_text)
 
     return label
+
+

@@ -117,6 +117,10 @@ class StdOutListener(StreamListener):
         elif status == 429:
             message = "[HTTP_ERROR]" + LOG_NAME + "429 Too Many Requests - Returned when a request cannot be " \
                                         "served due to the app's rate limit having been exhausted for the resource."
+        elif status == 413:
+            message = "[HTTP_ERROR]" + LOG_NAME + "413 Too Long - A parameter list is too long."
+        elif status == 416:
+            message = "[HTTP_ERROR]" + LOG_NAME + "416 Range Unacceptable"
         elif status == 502:
             message = "[HTTP_ERROR]" + LOG_NAME + "502 Bad Gateway - Twitter is down, or being upgraded."
         else:

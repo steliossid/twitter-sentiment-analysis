@@ -390,11 +390,13 @@ class StatsFrame(Frame):
         self.all_documents = self.collection.find()  # this is a Cursor object
 
         self.quick_facts_frm = Frame(self)
-        self.quick_facts_frm.grid(row=0, column=0, pady=20)
+        self.quick_facts_frm.grid(row=0, column=0, pady=5)
+        self.compare_frm = Frame(self)
+        self.compare_frm.grid(row=1, column=0, pady=5)
         show_graphs_frm = Frame(self)
-        show_graphs_frm.grid(row=1, column=0, pady=10)
+        show_graphs_frm.grid(row=2, column=0, pady=5)
         exit_frm = Frame(self)
-        exit_frm.grid(row=2, column=0, pady=10)
+        exit_frm.grid(row=3, column=0, pady=5)
 
         tweets_sum = self.all_documents.count()
         read_write.log_message("[INFO] (frames.StatsFrame) : Found " + str(tweets_sum) + " tweets in the DB")
@@ -403,7 +405,7 @@ class StatsFrame(Frame):
         if tweets_sum > 0:
             Label(self.quick_facts_frm, text="Textblob").grid(row=2, column=0, padx=2, pady=2)
             Label(self.quick_facts_frm, text="VADER").grid(row=3, column=0, padx=2, pady=2)
-            Label(self.quick_facts_frm, text="Training").grid(row=4, column=0, padx=2, pady=2)
+            Label(self.quick_facts_frm, text="NLTK").grid(row=4, column=0, padx=2, pady=2)
             Label(self.quick_facts_frm, text="Positive").grid(row=1, column=1, padx=6, pady=2)
             Label(self.quick_facts_frm, text="Neutral").grid(row=1, column=2, padx=6, pady=2)
             Label(self.quick_facts_frm, text="Negative").grid(row=1, column=3, padx=6, pady=2)
@@ -446,33 +448,92 @@ class StatsFrame(Frame):
             number_of_training_objective = self.collection.find({"training.subjectivity": 'obj'}).count()
             Label(self.quick_facts_frm, text=str(number_of_training_objective)).grid(row=4, column=5, pady=2)
 
-            Label(self.quick_facts_frm, text="Total unique tweets stored:").grid(row=5, column=0, padx=2, pady=2,
-                                                                                 sticky=W)
-            Label(self.quick_facts_frm, text=str(tweets_sum)).grid(row=5, column=1, pady=2)
+            Label(self.compare_frm, text="Total unique tweets stored:").grid(row=1, column=0, padx=2, pady=2, sticky=W)
+            Label(self.compare_frm, text=str(tweets_sum)).grid(row=1, column=1, pady=2)
+
+            all_pos_counter = self.collection.find({"textblob.polarity": 'pos', "vader.polarity": 'pos',
+                                                "training.polarity": 'pos'}).count()
+            all_neg_counter = self.collection.find({"textblob.polarity": 'neg', "vader.polarity": 'neg',
+                                                "training.polarity": 'neg'}).count()
+            all_neu_counter = self.collection.find({"textblob.polarity": 'neu', "vader.polarity": 'neu'}).count()
+            all_subj_counter = self.collection.find({"textblob.subjectivity": 'subj',
+                                                 "training.subjectivity": 'subj'}).count()
+            all_obj_counter = self.collection.find({"textblob.subjectivity": 'obj',
+                                                    "training.subjectivity": 'obj'}).count()
+
+            # pos_counter = 0
+            # neg_counter = 0
+            # neu_counter = 0
+            # subj_counter = 0
+            # obj_counter = 0
+            # for item in self.all_documents:  # for all items in the db
+                # check if one tweet is categorized as positive in all classifiers
+            #    if item["textblob"]["polarity"] == "pos" and item["vader"]["polarity"] == "pos" \
+             #                                           and item["training"]["polarity"] == "pos":
+              #      pos_counter += 1
+                # check if one tweet is categorized as negative in all classifiers
+             #   if item["textblob"]["polarity"] == "neg" and item["vader"]["polarity"] == "neg" \
+             #                                           and item["training"]["polarity"] == "neg":
+             #       neg_counter += 1
+                # check if one tweet is categorized as neutral in all classifiers
+             #   if item["textblob"]["polarity"] == "neu" and item["vader"]["polarity"] == "neu":
+             #       neu_counter += 1
+                # check if one tweet is categorized as subjective in all classifiers
+             #   if item["textblob"]["subjectivity"] == "subj" and item["training"]["subjectivity"] == "subj":
+             #       subj_counter += 1
+                # check if one tweet is categorized as objective in all classifiers
+             #   if item["textblob"]["subjectivity"] == "obj" and item["training"]["subjectivity"] == "obj":
+             #       obj_counter += 1
+
+            Label(self.compare_frm, text="Positive tweets that agree: ").grid(row=2, column=0, padx=2, pady=2, sticky=W)
+            Label(self.compare_frm, text=str(round((all_pos_counter/tweets_sum)*100, 1))+"%").grid(row=2, column=1,
+                                                                                                   pady=2)
+
+            Label(self.compare_frm, text="Negative tweets that agree: ").grid(row=3, column=0, padx=2, pady=2, sticky=W)
+            Label(self.compare_frm, text=str(round((all_neg_counter / tweets_sum) * 100, 1)) + "%").grid(row=3,
+                                                                                                         column=1,
+                                                                                                         pady=2)
+
+            Label(self.compare_frm, text="Neutral tweets that agree: ").grid(row=4, column=0, padx=2, pady=2, sticky=W)
+            Label(self.compare_frm, text=str(round((all_neu_counter / tweets_sum) * 100, 1)) + "%").grid(row=4,
+                                                                                                         column=1,
+                                                                                                         pady=2)
+
+            Label(self.compare_frm, text="Subjective tweets that agree: ").grid(row=5, column=0, padx=2, pady=2,
+                                                                                sticky=W)
+            Label(self.compare_frm, text=str(round((all_subj_counter / tweets_sum) * 100, 1)) + "%").grid(row=5,
+                                                                                                          column=1,
+                                                                                                          pady=2)
+
+            Label(self.compare_frm, text="Objective tweets that agree: ").grid(row=6, column=0, padx=2, pady=2,
+                                                                               sticky=W)
+            Label(self.compare_frm, text=str(round((all_obj_counter / tweets_sum) * 100, 1)) + "%").grid(row=6,
+                                                                                                         column=1,
+                                                                                                         pady=2)
 
             # build the widgets for show_graphs_frm
-            # textblob polarity piechart
-            self.textblob_polarity_btn = Button(show_graphs_frm, text="Textblob Polarity Piechart",
+            # textblob polarity pie chart
+            self.textblob_polarity_btn = Button(show_graphs_frm, text="Textblob Polarity Pie chart",
                                              command=chart_utils.show_textblob_polarity)
             self.textblob_polarity_btn.grid(row=0, column=1, pady=10, ipadx=5)
 
-            # textblob subjectivity piechart
-            self.textblob_subjectivity_btn = Button(show_graphs_frm, text="Textblob Subjectivity Piechart",
+            # textblob subjectivity pie chart
+            self.textblob_subjectivity_btn = Button(show_graphs_frm, text="Textblob Subjectivity Pie chart",
                                             command=chart_utils.show_textblob_subjectivity)
             self.textblob_subjectivity_btn.grid(row=1, column=1, pady=10, ipadx=5)
 
-            # vader polarity piechart
-            self.vader_polarity_btn = Button(show_graphs_frm, text="VADER Polarity Piechart",
+            # vader polarity pie chart
+            self.vader_polarity_btn = Button(show_graphs_frm, text="VADER Polarity Pie chart",
                                               command=chart_utils.show_vader_polarity)
             self.vader_polarity_btn.grid(row=2, column=1, pady=10, ipadx=5)
 
-            # training polarity piechart
-            self.training_polarity_btn = Button(show_graphs_frm, text="Training Polarity Piechart",
+            # training polarity pie chart
+            self.training_polarity_btn = Button(show_graphs_frm, text="NLTK Polarity Pie chart",
                                           command=chart_utils.show_training_polarity)
             self.training_polarity_btn.grid(row=3, column=1, pady=10, ipadx=5)
 
-            # training subjectivity piechart
-            self.training_subjectivity_btn = Button(show_graphs_frm, text="Training Subjectivity Piechart",
+            # training subjectivity pie chart
+            self.training_subjectivity_btn = Button(show_graphs_frm, text="NLTK Subjectivity Pie chart",
                                                 command=chart_utils.show_training_subjectivity)
             self.training_subjectivity_btn.grid(row=4, column=1, pady=10, ipadx=5)
         else:  # if we have an empty collection
