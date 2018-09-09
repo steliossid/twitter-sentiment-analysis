@@ -22,7 +22,7 @@ Sentiment Analysis Tool for Twitter using Python 3.5 and MongoDB
 
 * Install all Python libraries given or run `pip install -r requirements.txt`
 * Open a terminal and run `python`. Then, type `import nltk` and `nltk.download()`
-* Install `movie_reviews`, `subjectivity`, `stopwords` and `vader_lexicon` packages
+* Install `movie_reviews`, `subjectivity`, `stopwords`, `vader_lexicon` and `punkt` packages
 * Run main.py (make sure you have an open MongoDB connection)
 
 Forked from [DSkoufis/My_Thesis](https://github.com/DSkoufis/My_Thesis)
