@@ -4,7 +4,6 @@
 from utils import db_utils, manage_credentials, read_write, other_utils
 from tweepy import StreamListener
 import json
-import os.path
 from tkinter import messagebox
 from pymongo.errors import ServerSelectionTimeoutError, AutoReconnect
 
@@ -51,6 +50,10 @@ class StdOutListener(StreamListener):
 
         data = json.loads(data)  # turn the incoming data into json format
 
+        if "user" not in data:  # if tweet has no user, we don't want this tweet
+            print("No user data - ignoring tweet.")
+            self.ignore_counter += 1
+            return True
         if data["lang"] != "en":  # we deal only with English language text based tweets
             print("Non English - ignoring tweet.")
             self.ignore_counter += 1
@@ -76,6 +79,7 @@ class StdOutListener(StreamListener):
             read_write.log_message("[ERROR]" + LOG_NAME + "AutoReconnect: " + str(e))
             messagebox.showerror("Error", "Lost Connection to the DB")
             return False
+
         # return True to continue the loop
         return True
 
@@ -99,30 +103,6 @@ class StdOutListener(StreamListener):
         elif status == 504:
             message = "[HTTP_ERROR]" + LOG_NAME + "504 Gateway timeout - The Twitter servers are up, but " + \
                       "the request couldn’t be serviced due to some failure within our stack. Try again later."
-        elif status == 400:
-            message = "[HTTP_ERROR]" + LOG_NAME + "400 Bad Request - The request was invalid or " \
-                                                  "cannot be otherwise served."
-        elif status == 404:
-            message = "[HTTP_ERROR]" + LOG_NAME + "404 Not Found - The URI requested is invalid or the resource " + \
-                      "requested, such as a user, does not exist."
-        elif status == 406:
-            message = "[HTTP_ERROR]" + LOG_NAME + "406 Not Acceptable-Returned when an invalid format is specified " + \
-                      "in the request."
-        elif status == 410:
-            message = "[HTTP_ERROR]" + LOG_NAME + "410 Gone - This resource is gone.  " + \
-                      "Used to indicate that an API endpoint has been turned off."
-        elif status == 422:
-            message = "[HTTP_ERROR]" + LOG_NAME + " 422 Unprocessable Entity - Returned when the data is" + \
-                      "unable to be processed"
-        elif status == 429:
-            message = "[HTTP_ERROR]" + LOG_NAME + "429 Too Many Requests - Returned when a request cannot be " \
-                                        "served due to the app's rate limit having been exhausted for the resource."
-        elif status == 413:
-            message = "[HTTP_ERROR]" + LOG_NAME + "413 Too Long - A parameter list is too long."
-        elif status == 416:
-            message = "[HTTP_ERROR]" + LOG_NAME + "416 Range Unacceptable"
-        elif status == 502:
-            message = "[HTTP_ERROR]" + LOG_NAME + "502 Bad Gateway - Twitter is down, or being upgraded."
         else:
             message = "[HTTP_ERROR]" + LOG_NAME + status + " Unknown."
 
@@ -211,15 +191,6 @@ stream_controller = StreamController()
 
 # function to start the Streaming API
 def start_stream(frame):
-    # check if user has saved the training sentiment analyzers
-    pol_checkfile = os.path.exists('files/sa_polarity.pickle')
-    subj_checkfile = os.path.exists('files/sa_subjectivity.pickle')
-    if not (pol_checkfile and subj_checkfile):
-        message = "SA files not found.\n"
-        message += "Go back to the main menu and Start Training first."
-        messagebox.showerror("Files not found", message)
-        read_write.log_message("[INFO]" + LOG_NAME + message)
-        return
     global stream_controller  # get the instance in hands
     # check if user gave a keyword
     if frame.keyword_entry.get().strip(" ") is not "":

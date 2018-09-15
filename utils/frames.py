@@ -461,30 +461,6 @@ class StatsFrame(Frame):
             all_obj_counter = self.collection.find({"textblob.subjectivity": 'obj',
                                                     "training.subjectivity": 'obj'}).count()
 
-            # pos_counter = 0
-            # neg_counter = 0
-            # neu_counter = 0
-            # subj_counter = 0
-            # obj_counter = 0
-            # for item in self.all_documents:  # for all items in the db
-                # check if one tweet is categorized as positive in all classifiers
-            #    if item["textblob"]["polarity"] == "pos" and item["vader"]["polarity"] == "pos" \
-             #                                           and item["training"]["polarity"] == "pos":
-              #      pos_counter += 1
-                # check if one tweet is categorized as negative in all classifiers
-             #   if item["textblob"]["polarity"] == "neg" and item["vader"]["polarity"] == "neg" \
-             #                                           and item["training"]["polarity"] == "neg":
-             #       neg_counter += 1
-                # check if one tweet is categorized as neutral in all classifiers
-             #   if item["textblob"]["polarity"] == "neu" and item["vader"]["polarity"] == "neu":
-             #       neu_counter += 1
-                # check if one tweet is categorized as subjective in all classifiers
-             #   if item["textblob"]["subjectivity"] == "subj" and item["training"]["subjectivity"] == "subj":
-             #       subj_counter += 1
-                # check if one tweet is categorized as objective in all classifiers
-             #   if item["textblob"]["subjectivity"] == "obj" and item["training"]["subjectivity"] == "obj":
-             #       obj_counter += 1
-
             Label(self.compare_frm, text="Positive tweets that agree: ").grid(row=2, column=0, padx=2, pady=2, sticky=W)
             Label(self.compare_frm, text=str(round((all_pos_counter/tweets_sum)*100, 1))+"%").grid(row=2, column=1,
                                                                                                    pady=2)
