@@ -50,10 +50,6 @@ class StdOutListener(StreamListener):
 
         data = json.loads(data)  # turn the incoming data into json format
 
-        if "user" not in data:  # if tweet has no user, we don't want this tweet
-            print("No user data - ignoring tweet.")
-            self.ignore_counter += 1
-            return True
         if data["lang"] != "en":  # we deal only with English language text based tweets
             print("Non English - ignoring tweet.")
             self.ignore_counter += 1
