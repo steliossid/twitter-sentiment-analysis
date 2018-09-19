@@ -305,6 +305,8 @@ class StreamFrame(Frame):
             # These frames will hold the widgets
             nofiles_frm = Frame(self)  # this for the the warning message and the back and exit buttons
             nofiles_frm.grid(row=3, column=0, pady=5)
+            exit_frm = Frame(self)  # exit frame, contains back and exit button
+            exit_frm.grid(row=4, column=0, pady=5)
 
             message = "SA files not found."
             read_write.log_message("[WARN] (frames.StreamFrame) : " + message)
@@ -314,9 +316,9 @@ class StreamFrame(Frame):
             self.mng_stream_btn = Button(nofiles_frm, text="Start Stream")  # ignore this, if there are no tweets
 
             # Build the widgets for nofiles_frm
-            self.back_btn = Button(nofiles_frm, text="Back")
+            self.back_btn = Button(exit_frm, text="Back")
             self.back_btn.grid(row=1, column=1, ipadx=5, ipady=3, pady=15)
-            self.exit_btn = Button(nofiles_frm, text="Exit", command=self.safe_exit)
+            self.exit_btn = Button(exit_frm, text="Exit", command=self.safe_exit)
             self.exit_btn.grid(row=1, column=3, ipadx=5, ipady=3, padx=15, pady=10)
         else:
             # These frames will hold the widgets
