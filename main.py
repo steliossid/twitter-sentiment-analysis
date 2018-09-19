@@ -62,18 +62,6 @@ def goto_db_frame(root, frame):
 
 
 def goto_stream_frame(root, frame):
-    try:
-        f1 = open("files/sa_polarity.pickle")
-        f2 = open("files/sa_subjectivity.pickle")
-    except FileNotFoundError as e:
-        message = "SA files not found.\n"
-        message += "Click Start Training first to train the NLTK classifiers."
-        messagebox.showerror("Files not found", message)
-        read_write.log_message("[INFO]" + LOG_NAME + message)
-        read_write.log_message("[INFO]" + LOG_NAME + str(e))
-        return
-    f1.close()
-    f2.close()
     frame.destroy()
     stream_frame = frames.StreamFrame(root)
     stream_frame.back_btn.config(command=lambda: goto_main_frame(root=root, frame=stream_frame))
