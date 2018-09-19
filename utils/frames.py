@@ -5,6 +5,7 @@ from tkinter import Listbox, messagebox, StringVar, N, W, E, S
 from tkinter.ttk import Button, Label, Entry, Frame, Radiobutton
 from utils import read_write, db_utils, stream_util, chart_utils, training
 from pymongo.errors import ServerSelectionTimeoutError, AutoReconnect
+import os
 
 LOG_NAME = " (frames) : "
 
@@ -296,34 +297,58 @@ class StreamFrame(Frame):
         super(StreamFrame, self).__init__(master)
         self.root = master
 
-        # These frames will hold the widgets
-        label_frm = Frame(self)  # this for the label and entry
-        label_frm.grid(row=0, column=2, padx=10, pady=10, ipady=20, ipadx=20)
-        self.keywords_frm = Frame(self)  # this will be hidden until user wants to see previous keywords
-        self.keywords_frm.grid(row=0, column=3, rowspan=3, pady=15)
+        # check if user has saved the training sentiment analyzers
+        pol_checkfile = os.path.exists('files/sa_polarity.pickle')
+        subj_checkfile = os.path.exists('files/sa_subjectivity.pickle')
 
-        # Build the widgets for label_frm
-        Label(label_frm, text="Keyword:").grid(row=0, column=0, padx=20)
-        self.keyword_entry = Entry(label_frm, width=30)
-        self.keyword_entry.grid(row=0, column=1, columnspan=3)
+        if not (pol_checkfile and subj_checkfile):  # if we cant find the SA files
+            # These frames will hold the widgets
+            nofiles_frm = Frame(self)  # this for the the warning message and the back and exit buttons
+            nofiles_frm.grid(row=3, column=0, pady=5)
 
-        # Build the widgets for button_frm
-        self.mng_stream_btn = Button(label_frm, text="Start Stream")  # this will change from start to stop
-        self.mng_stream_btn.grid(row=1, column=1, ipadx=5, ipady=3, pady=20)
-        self.pause_stream_btn = Button(label_frm, text="Pause Stream")  # this will show up, only if user start stream
-        self.pause_stream_btn.grid(row=1, column=3, ipadx=5, ipady=3, padx=10, pady=20)
-        self.pause_stream_btn.grid_remove()
+            message = "SA files not found."
+            read_write.log_message("[WARN] (frames.StreamFrame) : " + message)
+            message += "\nClick Start Training first to train the NLTK classifiers."
+            Label(nofiles_frm, text=message).grid(row=0, column=0, padx=10, pady=5)
 
-        # Build the widgets for exit_frm
-        self.back_btn = Button(label_frm, text="Back")
-        self.back_btn.grid(row=2, column=1, ipadx=5, ipady=3, pady=15)
-        self.exit_btn = Button(label_frm, text="Exit", command=self.safe_exit)
-        self.exit_btn.grid(row=2, column=3, ipadx=5, ipady=3, padx=15, pady=10)
+            self.mng_stream_btn = Button(nofiles_frm, text="Start Stream")  # ignore this, if there are no tweets
 
-        # Build the widgets for keywords_frm
-        self.manage_keywords_btn = Button(self.keywords_frm, command=self.show_keywords,
-                                          text=">>>")  # this will change into "<<<" when user clicks it
-        self.manage_keywords_btn.grid(row=0, column=0, ipadx=5, ipady=3, padx=10)
+            # Build the widgets for nofiles_frm
+            self.back_btn = Button(nofiles_frm, text="Back")
+            self.back_btn.grid(row=1, column=1, ipadx=5, ipady=3, pady=15)
+            self.exit_btn = Button(nofiles_frm, text="Exit", command=self.safe_exit)
+            self.exit_btn.grid(row=1, column=3, ipadx=5, ipady=3, padx=15, pady=10)
+        else:
+            # These frames will hold the widgets
+            label_frm = Frame(self)  # this for the label and entry
+            label_frm.grid(row=0, column=2, padx=10, pady=10, ipady=20, ipadx=20)
+
+            # Frame for keywords
+            self.keywords_frm = Frame(self)  # this will be hidden until user wants to see previous keywords
+            self.keywords_frm.grid(row=0, column=3, rowspan=3, pady=15)
+
+            # Build the widgets for label_frm
+            Label(label_frm, text="Keyword:").grid(row=0, column=0, padx=20)
+            self.keyword_entry = Entry(label_frm, width=30)
+            self.keyword_entry.grid(row=0, column=1, columnspan=3)
+
+            # Build the widgets for button_frm
+            self.mng_stream_btn = Button(label_frm, text="Start Stream")  # this will change from start to stop
+            self.mng_stream_btn.grid(row=1, column=1, ipadx=5, ipady=3, pady=20)
+            self.pause_stream_btn = Button(label_frm, text="Pause Stream")  # if user starts stream, show this button
+            self.pause_stream_btn.grid(row=1, column=3, ipadx=5, ipady=3, padx=10, pady=20)
+            self.pause_stream_btn.grid_remove()
+
+            # Build the widgets for keywords_frm
+            self.manage_keywords_btn = Button(self.keywords_frm, command=self.show_keywords,
+                                              text=">>>")  # this will change into "<<<" when user clicks it
+            self.manage_keywords_btn.grid(row=0, column=0, ipadx=5, ipady=3, padx=10)
+
+            # Build the widgets for exit_frm
+            self.back_btn = Button(label_frm, text="Back")
+            self.back_btn.grid(row=2, column=1, ipadx=5, ipady=3, pady=15)
+            self.exit_btn = Button(label_frm, text="Exit", command=self.safe_exit)
+            self.exit_btn.grid(row=2, column=3, ipadx=5, ipady=3, padx=15, pady=10)
 
     # this method creates a new list box and populates it with the data from keywords.json
     def show_keywords(self):
