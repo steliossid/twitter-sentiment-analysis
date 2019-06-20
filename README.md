@@ -1,5 +1,5 @@
 # Sentiment Analysis Tool for Twitter
-Sentiment Analysis Tool for Twitter using Python 3.5 and MongoDB
+Sentiment Analysis Tool for tweets using Python, MongoDB and Twitter Streaming API
 
 ## Requirements
 * Twitter App
